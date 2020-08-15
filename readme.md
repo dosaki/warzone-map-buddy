@@ -14,7 +14,7 @@ Feel free to create an [issue](https://github.com/dosaki/warzone-map-buddy/issue
 
 ## Before using
 ### Download & setup
-1. Get warzone-map-buddy
+1. Download the [warzone-map-buddy zip](https://github.com/dosaki/warzone-map-buddy/archive/master.zip) or clone this repository
 2. Open a terminal window
 3. Navigate to the directory where you've downloaded warzone-map-buddy (`cd /path/to/directory`)
 4. Install the dependencies with `pip install -r requirements.txt`
