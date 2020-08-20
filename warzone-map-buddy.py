@@ -147,10 +147,26 @@ def show_territory_gaps(doc):
 def save(doc, out_file):
     with open(out_file, "w") as xml_file:
         doc.writexml(xml_file)
-    
+
+def removeAllTags(doc, tag):
+    tags = doc.getElementsByTagName(tag)
+    for t in tags:
+        t.parentNode.removeChild(t)
+
+def clean_style(style):
+    styles = filter(lambda x: "fill" in x or "stroke" in x, style.split(","))
+    return ";".join(styles)
+
 def lighten(file_path):
     territories = []
     doc = minidom.parse(file_path)
+    paths = filter(lambda x: 'BonusLink_' in x.getAttribute('id'), doc.getElementsByTagName('*'))
+    for path in paths:
+        attrkeys = [*path.attributes._attrs.keys()]
+        for attr in attrkeys:
+            if attr not in ['d', 'id', 'transform', 'width', 'height', 'x', 'y', 'ry', 'rx']:
+                path.removeAttribute(attr)
+
     paths = filter(lambda x: 'Territory_' in x.getAttribute('id'), doc.getElementsByTagName('*'))
     for path in paths:
         children = path.getElementsByTagName('*')
@@ -160,6 +176,34 @@ def lighten(file_path):
         for attr in attrkeys:
             if attr not in ['d', 'id', 'transform']:
                 path.removeAttribute(attr)
+                
+    paths = doc.getElementsByTagName('g')
+    for path in paths:
+        attrkeys = [*path.attributes._attrs.keys()]
+        for attr in attrkeys:
+            if attr not in ['transform']:
+                path.removeAttribute(attr)
+
+    paths = filter(lambda x: not ('Information' in x.getAttribute('id') or 'BonusLink_' in x.getAttribute('id') or 'portal' in x.getAttribute('inkscape:label')), doc.getElementsByTagName('*'))
+    for path in paths:
+        if "style" in path.attributes._attrs.keys():
+            path.setAttribute('style', clean_style(path.getAttribute('style')))
+
+        attrkeys = [*path.attributes._attrs.keys()]
+        for attr in attrkeys:
+            if attr not in ['d', 'id', 'transform', 'style'] and path.nodeName != "svg":
+                path.removeAttribute(attr)
+
+        if 'Territory_' in path.getAttribute('id'):
+            for child in path.getElementsByTagName('*'):
+                child.parentNode.removeChild(child)
+        if 'Territory_' not in path.getAttribute('id'):
+            for child in path.getElementsByTagName('title'):
+                child.parentNode.removeChild(child)
+
+    removeAllTags(doc, 'defs')
+    removeAllTags(doc, 'sodipodi:namedview')
+
     return doc
 
 def clean(file_name, out_file_name):
